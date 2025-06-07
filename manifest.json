@@ -3,9 +3,7 @@
     "name": "Mouse Gesture",
     "version": "1.0.0",
     "description": "Use mouse gestures to navigate your browser",
-    "host_permissions": [
-        "<all_urls>"
-    ],
+    "permissions": ["activeTab"],
     "content_scripts": [
         {
             "matches": [
