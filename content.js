@@ -1,17 +1,37 @@
 // content.js
 const gestureActions = {
-    '↓←': { name: 'Back' },
-    '↓→': { name: 'Forward' },
-    '↗': { name: 'Refresh' },
+    '↓←': {
+        name: 'Back', run: () => {
+            if (history.length > 1) {
+                history.back();
+            } else {
+                showToast('⬅️ 이전 페이지 없음');
+            }
+        }
+    },
+    '↓→': {
+        name: 'Forward', run: () => {
+            history.forward();
+            // 정확한 판단은 어려우나 사용자 피드백 목적의 fallback 제공
+            setTimeout(() => {
+                showToast('➡️ 다음 페이지 없음');
+            }, 500);
+        }
+    },
+    '↗': { name: 'Refresh', run: () => location.reload() },
 };
+
+let isRightMouseDown = false;
+let path = [];
+let shouldPreventMenu = false;
+let trailCanvas, trailCtx;
+let trailTimeout = null;
 
 function simplifyPath(points) {
     if (points.length < 2) return '';
-    const start = points[0];
-    const end = points[points.length - 1];
-    const dx = end[0] - start[0];
-    const dy = end[1] - start[1];
-    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    const start = points[0], end = points[points.length - 1];
+    const dx = end[0] - start[0], dy = end[1] - start[1];
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
 
     const getDir = (a) => {
         if (a >= -30 && a < 30) return '→';
@@ -27,12 +47,9 @@ function simplifyPath(points) {
 
     const firstDir = getDir(angle);
 
-    let maxDist = 0;
-    let cornerIndex = -1;
+    let maxDist = 0, cornerIndex = -1;
     for (let i = 1; i < points.length - 1; i++) {
-        const [x0, y0] = start;
-        const [x1, y1] = end;
-        const [px, py] = points[i];
+        const [x0, y0] = start, [x1, y1] = end, [px, py] = points[i];
         const dist = Math.abs((y1 - y0) * px - (x1 - x0) * py + x1 * y0 - y1 * x0) / Math.hypot(y1 - y0, x1 - x0);
         if (dist > maxDist) {
             maxDist = dist;
@@ -42,24 +59,13 @@ function simplifyPath(points) {
 
     if (maxDist > 30 && cornerIndex > 2 && cornerIndex < points.length - 3) {
         const mid = points[cornerIndex];
-        const angle1 = Math.atan2(mid[1] - start[1], mid[0] - start[0]) * (180 / Math.PI);
-        const angle2 = Math.atan2(end[1] - mid[1], end[0] - mid[0]) * (180 / Math.PI);
+        const angle1 = Math.atan2(mid[1] - start[1], mid[0] - start[0]) * 180 / Math.PI;
+        const angle2 = Math.atan2(end[1] - mid[1], end[0] - mid[0]) * 180 / Math.PI;
         return getDir(angle1) + getDir(angle2);
     } else {
         return firstDir;
     }
 }
-
-function pathToSvgD(points) {
-    if (points.length === 0) return '';
-    return points.map(([x, y], i) => (i === 0 ? `M${x} ${y}` : `L${x} ${y}`)).join(' ');
-}
-
-let isRightMouseDown = false;
-let path = [];
-let shouldPreventMenu = false;
-let trailCanvas, trailCtx;
-let trailTimeout = null;
 
 function createTrailCanvas() {
     trailCanvas = document.createElement('canvas');
@@ -115,35 +121,27 @@ function fadeOutTrailCanvas() {
     setTimeout(() => clearTrailCanvas(), 800);
 }
 
-function showToastAt(x, y, gesture) {
-    // 기존 toast 제거
+function showToast(message) {
     document.querySelectorAll('[data-gesture-toast]').forEach(el => el.remove());
 
-    const action = gestureActions[gesture];
-    const isKnown = typeof action?.name === 'string';
-    const label = isKnown ? action.name : 'Unknown';
-
-    if (!isKnown) {
-        console.log('path:', pathToSvgD(path));
-        console.log('gesture:', gesture);
-        console.log('label:', label);
-    }
-
     const toast = document.createElement('div');
-    toast.textContent = label;
-    toast.setAttribute('data-gesture-toast', 'true'); // ✅ 고유 식별자
+    toast.textContent = message;
+    toast.setAttribute('data-gesture-toast', 'true');
 
     Object.assign(toast.style, {
         position: 'fixed',
-        left: `${x}px`,
-        top: `${y}px`,
-        transform: 'translate(-50%, -50%)', // ✅ 중앙 정렬
+        left: '50%',
+        bottom: '50px',
+        transform: 'translateX(-50%)',
         fontWeight: 'bold',
-        fontSize: '24px',
+        fontSize: '18px',
+        background: 'rgba(0,0,0,0.8)',
+        color: 'white',
+        padding: '8px 16px',
+        borderRadius: '6px',
         zIndex: '1000000',
         pointerEvents: 'none',
         opacity: '0',
-        color: isKnown ? 'red' : 'gray',
         transition: 'opacity 0.3s ease',
     });
 
@@ -151,7 +149,7 @@ function showToastAt(x, y, gesture) {
     requestAnimationFrame(() => (toast.style.opacity = '1'));
     setTimeout(() => {
         toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 300);
+        toast.addEventListener('transitionend', () => toast.remove());
     }, 1500);
 }
 
@@ -162,23 +160,76 @@ function forceGestureEnd() {
     if (!isShortGesture(path)) {
         const gesture = simplifyPath(path);
         const isKnown = gesture in gestureActions;
+        const action = gestureActions[gesture];
+        const label = isKnown ? action.name : 'Unknown';
+
+        const start = path[0];
+        const end = path[path.length - 1];
+        const toastX = (start[0] + end[0]) / 2;
+        const toastY = (start[1] + end[1]) / 2;
 
         if (!isKnown && trailCtx) {
             trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
             drawTrail(path, 'gray');
         }
 
-        const start = path[0];
-        const end = path[path.length - 1];
-        const toastX = (start[0] + end[0]) / 2;
-        const toastY = (start[1] + end[1]) / 2;
-        showToastAt(toastX, toastY, gesture);
-        chrome.runtime.sendMessage({ gesture });
+        showToastAt(toastX, toastY, label, isKnown); 
+
+        if (typeof action?.run === 'function') {
+            action.run();
+        }
+
+        // ✅ 실행 시 실패할 수 있는 동작에 대해, 실패 메시지도 같은 위치에 출력
+        if (gesture === '↓←') {
+            if (history.length > 1) {
+                history.back();
+            } else {
+                showToastAt(toastX, toastY, '⬅️ 이전 없음');
+            }
+        } else if (gesture === '↓→') {
+            history.forward();
+            setTimeout(() => {
+                // 완벽한 판단은 어렵지만 UX 보완용
+                showToastAt(toastX, toastY, '➡️ 다음 없음');
+            }, 500);
+        } else if (gesture === '↗') {
+            location.reload();
+        }
     }
 
     fadeOutTrailCanvas();
     path = [];
     shouldPreventMenu = false;
+}
+
+function showToastAt(x, y, text, isKnown) {
+    document.querySelectorAll('[data-gesture-toast]').forEach(el => el.remove());
+
+    const toast = document.createElement('div');
+    toast.textContent = text;
+    toast.setAttribute('data-gesture-toast', 'true');
+
+    Object.assign(toast.style, {
+        position: 'fixed',
+        left: `${x}px`,
+        top: `${y}px`,
+        transform: 'translate(-50%, -50%)',
+        fontWeight: 'bold',
+        fontSize: '24px',
+        zIndex: '1000000',
+        pointerEvents: 'none',
+        opacity: '0',
+        color: isKnown ? 'red' : 'gray',
+        background: 'transparent',
+        transition: 'opacity 0.3s ease',
+    });
+
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => (toast.style.opacity = '1'));
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 1500);
 }
 
 document.addEventListener('mousedown', (e) => {
@@ -200,7 +251,7 @@ document.addEventListener('mousedown', (e) => {
 document.addEventListener('mousemove', (e) => {
     if (!isRightMouseDown) return;
     path.push([e.clientX, e.clientY]);
-    drawTrail(path); // 기본 빨간색
+    drawTrail(path);
     if (!shouldPreventMenu && !isShortGesture(path)) {
         shouldPreventMenu = true;
     }
