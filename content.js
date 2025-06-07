@@ -1,20 +1,18 @@
-// content.js
 const gestureActions = {
     '↓←': {
         name: 'Back', run: () => {
             if (history.length > 1) {
                 history.back();
             } else {
-                showToast('⬅️ 이전 페이지 없음');
+                showToast('⬅️ No previous page');
             }
         }
     },
     '↓→': {
         name: 'Forward', run: () => {
             history.forward();
-            // 정확한 판단은 어려우나 사용자 피드백 목적의 fallback 제공
             setTimeout(() => {
-                showToast('➡️ 다음 페이지 없음');
+                showToast('➡️ No next page');
             }, 500);
         }
     },
@@ -173,24 +171,22 @@ function forceGestureEnd() {
             drawTrail(path, 'gray');
         }
 
-        showToastAt(toastX, toastY, label, isKnown); 
+        showToastAt(toastX, toastY, label, isKnown);
 
         if (typeof action?.run === 'function') {
             action.run();
         }
 
-        // ✅ 실행 시 실패할 수 있는 동작에 대해, 실패 메시지도 같은 위치에 출력
         if (gesture === '↓←') {
             if (history.length > 1) {
                 history.back();
             } else {
-                showToastAt(toastX, toastY, '⬅️ 이전 없음');
+                showToastAt(toastX, toastY, '⬅️ No previous page');
             }
         } else if (gesture === '↓→') {
             history.forward();
             setTimeout(() => {
-                // 완벽한 판단은 어렵지만 UX 보완용
-                showToastAt(toastX, toastY, '➡️ 다음 없음');
+                showToastAt(toastX, toastY, '➡️ No next page');
             }, 500);
         } else if (gesture === '↗') {
             location.reload();
