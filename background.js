@@ -1,23 +1,20 @@
+// background.js
+const gestureActions = {
+    '↓←': { name: 'Back', func: chrome.tabs.goBack },
+    '↓→': { name: 'Forward', func: chrome.tabs.goForward },
+    '↗': { name: 'Refresh', func: chrome.tabs.reload },
+};
+
 chrome.runtime.onMessage.addListener((message, sender) => {
     const gesture = message.gesture;
+    const tabId = sender.tab?.id;
 
-    switch (gesture) {
-        case '←':
-            chrome.tabs.goBack(sender.tab.id);
-            break;
-        case '→':
-            chrome.tabs.goForward(sender.tab.id);
-            break;
-        case '↓↑':
-            chrome.tabs.reload(sender.tab.id);
-            break;
-        case '↓→':
-            chrome.tabs.create({});
-            break;
-        case '↓←':
-            chrome.tabs.remove(sender.tab.id);
-            break;
-        default:
-            console.log('Unknown gesture:', gesture);
+    const action = gestureActions[gesture];
+    if (action && typeof action.func === 'function' && tabId !== undefined) {
+        setTimeout(() => {
+            action.func(tabId);
+        }, 1000);
+    } else {
+        console.log('Unknown gesture:', gesture);
     }
 });
