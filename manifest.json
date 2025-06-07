@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Mouse Gesture",
     "version": "1.0.0",
-    "description": "Use mouse gestures to navigate your browser",
+    "description": "Navigate the web using simple mouse gestures",
     "permissions": ["activeTab"],
     "content_scripts": [
         {
