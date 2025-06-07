@@ -6,7 +6,7 @@
 
 **Title from package**: Mouse Gesture
 
-**Summary from package**: Navigate using simple mouse gestures
+**Summary from package**: Navigate the web using simple mouse gestures
 
 **Description**:
 ```
@@ -17,7 +17,7 @@ FEATURES:
 - ←↓ for Back, ↓→ for Forward, ↗ for Refresh
 - Smooth, visual gesture trail
 - No settings, no bloat
-- No permissions required
+- No unnecessary permissions
 - Fully open source: https://github.com/jmnote/mouse-gesture
 ```
 
@@ -70,7 +70,9 @@ FEATURES:
 
 ### Permission justification
 
-**Host permission justification**: This extension enables mouse gesture navigation (Back, Forward, Refresh) by tracking right-click gestures on web pages. It does not read, change, or collect any page content or user data.
+**activeTab justification**: This extension uses the activeTab permission to perform navigation actions such as Back, Forward, and Refresh in response to explicit user gestures. It does not access, read, or modify the content of any web page.
+
+**Host permission justification**: This extension injects a content script into all websites to detect user-initiated mouse gestures. It only monitors mouse movement patterns for gesture recognition and does not access, read, or alter any web page content.
 
 **Are you using remote code?** 🔘 No, I am not using remote code.
 
