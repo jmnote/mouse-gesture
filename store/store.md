@@ -33,11 +33,11 @@ FEATURES:
 </a>
 
 **Screenshots**:  
-<a href="https://github.com/jmnote/mouse-gesture/blob/main/store/assets/screen-window.png">
-  <img src="assets/screen-window.png" alt="Screenshot: Window" width="160" />
+<a href="https://github.com/jmnote/mouse-gesture/blob/main/store/assets/screen-1.png">
+  <img src="assets/screen-1.png" alt="Screenshot: 1" width="160" />
 </a>  
-<a href="https://github.com/jmnote/mouse-gesture/blob/main/store/assets/screen-full.png">
-  <img src="assets/screen-full.png" alt="Screenshot: Fullscreen" width="160" />
+<a href="https://github.com/jmnote/mouse-gesture/blob/main/store/assets/screen-2.png">
+  <img src="assets/screen-2.png" alt="Screenshot: 2" width="160" />
 </a>
 
 **Small promo tile**:  
