@@ -1,0 +1,34 @@
+<svg width="1280" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="LightGreen" />
+      <stop offset="100%" stop-color="RoyalBlue" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="16" dy="16" stdDeviation="16" flood-color="black" flood-opacity="0.4"/>
+    </filter>
+
+    <marker id="arrowhead" viewBox="0 0 15 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="5" markerHeight="3" orient="auto">
+      <path d="M 0 0 L 15 5 L 0 10 z" stroke="none" fill="red"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="800" fill="url(#gradient)" />
+
+  <g filter="url(#shadow)">
+    <rect x="120" y="120" width="1040" height="560" rx="20" ry="20" fill="white" />
+    <text x="640" y="240" text-anchor="middle" fill="gray" font-size="60" font-family="Arial">Gestures</text>
+
+    <!-- Back -->
+    <path d="M415 325 v150 h-150" stroke="red" stroke-width="6" fill="none" marker-end="url(#arrowhead)" />
+    <text x="340" y="560" font-size="32" text-anchor="middle" fill="gray" font-family="Arial">Back</text>
+
+    <!-- Forward -->
+    <path d="M565 325 v150 h150" stroke="red" stroke-width="6" fill="none" marker-end="url(#arrowhead)" />
+    <text x="640" y="560" font-size="32" text-anchor="middle" fill="gray" font-family="Arial">Forward</text>
+
+    <!-- Refresh -->
+    <path d="M865 475 l150 -150" stroke="red" stroke-width="6" fill="none" marker-end="url(#arrowhead)" />
+    <text x="940" y="560" font-size="32" text-anchor="middle" fill="gray" font-family="Arial">Refresh</text>
+  </g>
+</svg>
