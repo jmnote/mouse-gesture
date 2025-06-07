@@ -21,9 +21,9 @@ FEATURES:
 - Fully open source: https://github.com/jmnote/mouse-gesture
 ```
 
-**Category**: Productivity
+**Category**: Tools
 
-**Language**: English (United States)
+**Language**: English
 
 ### Graphic Assets
 
@@ -68,7 +68,9 @@ FEATURES:
 
 **Single Purpose**: This extension allows users to perform browser navigation with mouse gestures.
 
-### Permission Justification
+### Permission justification
+
+**Host permission justification**: This extension enables mouse gesture navigation (Back, Forward, Refresh) by tracking right-click gestures on web pages. It does not read, change, or collect any page content or user data.
 
 **Are you using remote code?** 🔘 No, I am not using remote code.
 
